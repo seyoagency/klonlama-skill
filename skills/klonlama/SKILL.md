@@ -79,7 +79,7 @@ PHASE 4: Assembly & Final QA
 
 ---
 
-## PHASE 1: Reconnaissance
+## PHASE 1: Reconnaissance [TOOL: Playwright primary, Chrome MCP for interaction sweep]
 
 ### Step 1.1 — Open and Screenshot the Target (3 viewport ZORUNLU)
 
@@ -585,7 +585,7 @@ Ciktilari BEHAVIORS.md'nin "Responsive breakpoints" bolumune ekle.
 
 ---
 
-## PHASE 2: Asset Collection
+## PHASE 2: Asset Collection [TOOL: Playwright (extraction) + Bash/curl (download)]
 
 ### Step 2.1 — Download Images
 
@@ -746,7 +746,7 @@ binding map kaydindaki `src` degeriyle AYNI olmali. Farkli ise YANLIS gorseli ku
 
 ---
 
-## PHASE 3: Section-by-Section Cloning
+## PHASE 3: Section-by-Section Cloning [TOOL: Playwright (extraction+diff), Chrome MCP (review)]
 
 This is the core of the skill. For EACH section identified in Phase 1:
 
@@ -1611,7 +1611,7 @@ builder'lar ise kucuk, odakli duzeltmeler yapar.
 
 ---
 
-## PHASE 4: Assembly & Final QA
+## PHASE 4: Assembly & Final QA [TOOL: Playwright (screenshot), Chrome MCP (live review)]
 
 ### Step 4.1 — Combine All Sections
 
