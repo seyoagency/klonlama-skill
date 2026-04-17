@@ -1,0 +1,6 @@
+fonts/0.download: Web Open Font Format, TrueType, length 102588, version 4.7
+fonts/1.download: Web Open Font Format, TrueType, length 21964, version 0.0
+fonts/2.download: Web Open Font Format (Version 2), TrueType, length 17148, version 1.0
+fonts/3.download: Web Open Font Format (Version 2), TrueType, length 18656, version 1.0
+fonts/4.download: Web Open Font Format (Version 2), TrueType, length 19456, version 1.0
+fonts/5.download: ASCII text, with very long lines (1298), with CRLF line terminators

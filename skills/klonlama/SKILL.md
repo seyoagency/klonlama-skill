@@ -79,7 +79,7 @@ PHASE 4: Assembly & Final QA
 
 ---
 
-## PHASE 1: Reconnaissance
+## PHASE 1: Reconnaissance [TOOL: Playwright primary, Chrome MCP for interaction sweep]
 
 ### Step 1.1 — Open and Screenshot the Target (3 viewport ZORUNLU)
 
@@ -332,6 +332,132 @@ file public/fonts/*.woff2 public/fonts/*.woff
 # "HTML document" goruyorsan URL YANLIS — resolve edilen URL'yi kontrol et
 ```
 
+#### Step 1.3b — CSS Custom Properties Extraction (YENI v2)
+
+Site `:root { --primary: #004C93; --spacing-md: 16px; }` gibi design token'lar tanimliyorsa bunlari KAYNAKTA yakala. Computed degerler yerine token isimleri ile calismak klonda tekrar kullanilir ve iteratif renk ayari (kullanici "biraz daha koyu" dediginde) tek yerden yapilir.
+
+```javascript
+const customProps = await page.evaluate(() => {
+  const props = {};
+  for (const root of [document.documentElement, document.body]) {
+    const s = getComputedStyle(root);
+    for (const name of s) {
+      if (name.startsWith('--')) {
+        props[name] = s.getPropertyValue(name).trim();
+      }
+    }
+  }
+
+  const sheetProps = {};
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        if (rule.type !== 1) continue;
+        for (const prop of rule.style) {
+          if (prop.startsWith('--')) {
+            sheetProps[prop] = rule.style.getPropertyValue(prop).trim();
+          }
+        }
+      }
+    } catch(e) {}  // CORS stylesheet'ler okunamaz
+  }
+
+  return { root: props, sheets: sheetProps };
+});
+```
+
+Ciktiyi `design-tokens.json`'un icine `customProperties` anahtari altinda kaydet:
+
+```json
+{
+  "bodyBg": "rgb(255, 255, 255)",
+  "customProperties": {
+    "--primary": "#004C93",
+    "--secondary": "#726566",
+    "--spacing-md": "16px"
+  }
+}
+```
+
+**Tailwind config'e yansima:** Builder `tailwind.config.js`'e custom property'leri color/spacing/radius kategorilerine gore ekler:
+
+```javascript
+theme: {
+  extend: {
+    colors: {
+      primary: 'var(--primary)',
+      secondary: 'var(--secondary)'
+    }
+  }
+}
+```
+
+Component'te `bg-primary` kullanilir, 50 yerde `bg-[#004C93]` hardcoded olmaz.
+
+**CORS uyarisi:** Cross-origin stylesheet'ler `cssRules` ile okunamaz (`try/catch` atlar). Bu durumda sadece `:root` ve `body` computed'deki custom property'ler yakalanir, sheet kaynakli olanlar kacirilabilir. Site kendi domain'inden yuklu CSS kullaniyorsa sorun olmaz.
+
+### Step 1.3.5 — Network Response Tracking (YENI v2)
+
+Page'in GERCEKTEN yuklediği asset'lerin kesin URL'lerini yakala. CSS parsing ve `@font-face` extraction'a EK ve DOGRULAYICI bir katman. En sik yapilan hata olan "font URL yanlis resolve edildi, HTML/CSS indirildi" sorununu kokten kapatir.
+
+**Kritik:** `page.on('response')` listener'i `page.goto()` CAGIRISINDAN ONCE kurulmali. Goto sonrasi kurulan listener sayfanin yuklenme esnasindaki response'lari kacirir.
+
+```javascript
+const networkAssets = { fonts: [], images: [], stylesheets: [], videos: [] };
+
+page.on('response', async (response) => {
+  const url = response.url();
+  const ct = response.headers()['content-type'] || '';
+  const status = response.status();
+  if (status >= 400) return;  // hata sayfalarini alma
+
+  const entry = { url, status, size: 0 };
+  try { entry.size = (await response.body()).length; } catch(e) {}
+
+  if (ct.includes('font') || /\.(woff2?|ttf|otf|eot)(\?|$)/i.test(url)) {
+    networkAssets.fonts.push({ ...entry, format: ct });
+  } else if (ct.startsWith('image/') || /\.(png|jpg|jpeg|webp|avif|svg|gif)(\?|$)/i.test(url)) {
+    networkAssets.images.push(entry);
+  } else if (ct.includes('css') || /\.css(\?|$)/i.test(url)) {
+    networkAssets.stylesheets.push(entry);
+  } else if (ct.startsWith('video/') || /\.(mp4|webm|mov)(\?|$)/i.test(url)) {
+    networkAssets.videos.push(entry);
+  }
+});
+
+// Simdi goto et
+await page.goto(TARGET_URL, { waitUntil: 'networkidle' });
+fs.writeFileSync('reference/network-assets.json', JSON.stringify(networkAssets, null, 2));
+```
+
+**Dogrulama kurali:** Step 1.3'teki `@font-face` extraction URL'leri ile `networkAssets.fonts` URL'leri CAKISMALI. Cakismayanlar:
+- CSS'te tanimli ama kullanilmayan fontlar (ignore et)
+- CSS parsing'in yanlis resolve ettigi URL'ler (network'unkini kullan — cunku bu gercekten yuklenen dosya)
+
+Indirirken mutlaka network kaynakli URL'i kullan:
+
+```bash
+while IFS= read -r url; do
+  filename=$(basename "$url" | cut -d'?' -f1)
+  curl -fsSL -o "public/fonts/$filename" "$url"
+done < <(jq -r '.fonts[].url' reference/network-assets.json)
+
+file public/fonts/*.woff2 public/fonts/*.woff 2>/dev/null
+# Beklenen: "Web Open Font Format" — "HTML document" ya da "ASCII text" GORMEMELISIN
+```
+
+**Filtreleme (opsiyonel, tavsiye):** Analytics, telemetry gibi alakasiz response'lari eleyecek ek filtre:
+
+```javascript
+page.on('response', async (response) => {
+  const url = response.url();
+  if (/\/(analytics|track|pixel|beacon|collect)\//i.test(url)) return;
+  // ...kalani ayni
+});
+```
+
+Tracking URL'leri genellikle kucuk (< 500B) ve yonetilmek zor olduklarindan, onemli asset'lere odaklanmayi kolaylastirir.
+
 ### Step 1.4 — Smooth Scroll Library Detection (YENI)
 
 Modern sitelerde native scroll yerine Lenis, Locomotive Scroll gibi smooth-scroll
@@ -459,7 +585,7 @@ Ciktilari BEHAVIORS.md'nin "Responsive breakpoints" bolumune ekle.
 
 ---
 
-## PHASE 2: Asset Collection
+## PHASE 2: Asset Collection [TOOL: Playwright (extraction) + Bash/curl (download)]
 
 ### Step 2.1 — Download Images
 
@@ -620,7 +746,7 @@ binding map kaydindaki `src` degeriyle AYNI olmali. Farkli ise YANLIS gorseli ku
 
 ---
 
-## PHASE 3: Section-by-Section Cloning
+## PHASE 3: Section-by-Section Cloning [TOOL: Playwright (extraction+diff), Chrome MCP (review)]
 
 This is the core of the skill. For EACH section identified in Phase 1:
 
@@ -858,38 +984,69 @@ const sectionHTML = await page.evaluate((selector) => {
 Save as `reference/section-header.html` for reference. Don't copy it verbatim —
 use it to understand the structure, then write clean code.
 
-### Step 3.3b — Hover State Extraction (HER INTERAKTIF ELEMAN ICIN)
+### Step 3.3b — CSSOM'dan Hover State Extraction (v2 REVIZE)
 
-Kartlar, butonlar, linkler icin hover durumunu AYRI cikar. Hover'da neyin
-degistigini bilmeden component yazilamaz.
+**v1 yaklasimi (mouse hover + re-extract) kaldirilmisttir.** Yerine CSS kurallarini DOGRUDAN CSSOM'dan okuyoruz. Daha hizli, daha guvenilir, Chrome MCP'nin browser "read" tier kisitlamasindan etkilenmez.
 
 ```javascript
-// Hover state extraction — her interaktif eleman icin
-// Tarayici MCP ile elemana hover et, SONRA ayni elemani tekrar extract et
-// Ornek: kart hover
-const hoverData = await page.evaluate((selector) => {
-  const el = document.querySelector(selector);
-  if (!el) return null;
-  // Normal state zaten Step 3.2b'de cikarildi
-  // Simdi :hover pseudo-class varsa onu da al
-  // Not: getComputedStyle hover state'i dogrudan veremez,
-  // tarayici MCP ile hover edip tekrar extractNode calistirmalisin
-  const s = getComputedStyle(el);
-  return {
-    transition: s.transition,
-    cursor: s.cursor,
-    // Kart hover'da genelde degisen ozellikler:
-    boxShadow: s.boxShadow,
-    transform: s.transform,
-    backgroundColor: s.backgroundColor,
-    borderColor: s.borderColor,
-    opacity: s.opacity
-  };
-}, cardSelector);
+const hoverRules = await page.evaluate(() => {
+  const rules = [];
+  for (const sheet of document.styleSheets) {
+    let cssRules;
+    try { cssRules = sheet.cssRules; } catch(e) { continue; }  // CORS
+
+    for (const rule of cssRules) {
+      if (rule.type !== 1) continue;  // CSSStyleRule degilse atla
+      if (!rule.selectorText?.includes(':hover')) continue;
+
+      const baseSelector = rule.selectorText.replace(/:hover/g, '').trim();
+      let matchedElements = [];
+      try {
+        matchedElements = [...document.querySelectorAll(baseSelector)].slice(0, 3);
+      } catch(e) {}
+
+      const styleMap = {};
+      for (const prop of rule.style) {
+        styleMap[prop] = rule.style.getPropertyValue(prop);
+      }
+
+      rules.push({
+        selector: rule.selectorText,
+        baseSelector,
+        styles: styleMap,
+        sampleElements: matchedElements.map(el => ({
+          tag: el.tagName,
+          class: typeof el.className === 'string' ? el.className.split(' ').slice(0,3).join(' ') : '',
+          text: el.textContent?.trim().slice(0, 40)
+        }))
+      });
+    }
+  }
+  return rules;
+});
 ```
 
-Tarayici MCP ile hover edip ONCE/SONRA state'lerini karsilastir.
-Fark olan her ozelligi component'e transition + hover class olarak ekle.
+Ciktiyi `reference/hover-rules.json` olarak kaydet. Her component'in spec'inde "Hover States" bolumu bu JSON'dan su sekilde filtrelenir: ilgili component'in `baseSelector`'u ile eslesen kurallar.
+
+**Spec entegrasyonu ornegi:**
+
+```markdown
+## Hover States (from CSSOM)
+- `.btn-primary:hover`: background-color→#003a73, transform→translateY(-2px)
+- `.card:hover`: box-shadow→0 10px 30px rgba(0,0,0,0.15), transition→all 0.3s ease
+```
+
+Builder Tailwind'e cevirir: `hover:bg-[#003a73] hover:-translate-y-[2px]`.
+
+**CORS fallback:** Cross-origin stylesheet'ler okunamiyorsa (nadir, genelde CDN'lerde CORS header gonderilir), o stylesheet'in hover kurallari kacirilir. Bu durumda Chrome MCP ile kritik butonlarin hover'ini manuel dogrula.
+
+**Validation (opsiyonel):** Kritik bir component icin CSSOM'dan cikarilan hover degerini canli tarayicida DOGRULAMAK istersen Chrome MCP'yle:
+1. Sayfayi ac
+2. `mouse_move` ile elemana hover et
+3. `javascript_tool` ile `getComputedStyle(el)` al (bu sefer :hover pseudo-class aktif)
+4. CSSOM cikarilan degerle karsilastir
+
+Bu adim zorunlu degil — hover rule'larin %95'i CSSOM'da mevcuttur.
 
 ### Step 3.4a — Write Spec File → `docs/research/components/<Name>.spec.md` (ZORUNLU)
 
@@ -1356,6 +1513,93 @@ detaylari atlar. Orchestrator loop'u bunu otomatik yakalayip duzeltir.
    | MetiersSection | ✅ | ✅ | ⚠ | Card stack order wrong |
    | ... | ... | ... | ... | ... |
 
+#### Step 3.6b — Computed-Style Snapshot Diff (YENI v2)
+
+Pixel comparison gurultulu — font anti-aliasing, sub-pixel rendering farklari "gorsel fark" olarak sahte-pozitif uretir. Asil soru: **renkler, boyutlar, fontlar, padding'ler eslesiyor mu?** Bu bir JSON diff sorusudur.
+
+Her section icin orijinal ve klondan AYNI CSS property setini cikarip karsilastir. Pixel diff opsiyonel bir ek katman olarak kalir, ama birinci kontrol bu JSON diff'tir.
+
+```javascript
+async function snapshotSection(page, sectionSelector) {
+  return await page.evaluate((sel) => {
+    const root = document.querySelector(sel);
+    if (!root) return null;
+
+    const PROPS = [
+      'display','position','width','height','padding','margin',
+      'backgroundColor','color','fontSize','fontWeight','fontFamily',
+      'lineHeight','letterSpacing','textAlign','borderRadius','border',
+      'boxShadow','gap','flexDirection','justifyContent','alignItems',
+      'gridTemplateColumns','opacity','transform'
+    ];
+
+    function snap(el, path) {
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      const style = {};
+      for (const p of PROPS) style[p] = s[p];
+      return {
+        path, tag: el.tagName.toLowerCase(),
+        text: (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3)
+              ? el.textContent.trim().slice(0, 60) : null,
+        rect: { w: Math.round(r.width), h: Math.round(r.height) },
+        style,
+        children: [...el.children].map((c, i) => snap(c, `${path}/${c.tagName}[${i}]`))
+      };
+    }
+
+    return snap(root, sel);
+  }, sectionSelector);
+}
+
+function diffSnap(a, b, path = '') {
+  if (!a && !b) return [];
+  if (!a) return [{ path, diff: 'missing_in_original' }];
+  if (!b) return [{ path, diff: 'missing_in_clone' }];
+  const diffs = [];
+  for (const prop in a.style) {
+    if (a.style[prop] !== b.style[prop]) {
+      diffs.push({ path: a.path, prop, original: a.style[prop], clone: b.style[prop] });
+    }
+  }
+  const maxChildren = Math.max(a.children?.length || 0, b.children?.length || 0);
+  for (let i = 0; i < maxChildren; i++) {
+    diffs.push(...diffSnap(a.children?.[i], b.children?.[i], a.path));
+  }
+  return diffs;
+}
+
+// Kullanim — iki paralel context
+const origPage = await chromium.launch().then(b => b.newPage());
+await origPage.goto(TARGET_URL, { waitUntil: 'networkidle' });
+await origPage.waitForTimeout(2000);  // animasyonlar yerlessin
+const orig = await snapshotSection(origPage, 'header');
+
+const clonePage = await chromium.launch().then(b => b.newPage());
+await clonePage.goto('http://localhost:3000', { waitUntil: 'networkidle' });
+await clonePage.waitForTimeout(2000);
+const clone = await snapshotSection(clonePage, 'header');
+
+const diffs = diffSnap(orig, clone);
+fs.writeFileSync(`qa/diff-header.json`, JSON.stringify(diffs, null, 2));
+```
+
+**Builder dispatch'ine etkisi:** Pixel comparison "kart bg biraz farkli" derken, snapshot diff su sekilde net bir cikti verir:
+
+```json
+{ "path": "header/NAV/A[2]", "prop": "color", "original": "rgb(114, 101, 102)", "clone": "rgb(255, 255, 255)" }
+```
+
+Builder'a direkt talimat: "line 42'de `text-white` yerine `text-[#726566]` kullan." Iterasyon sayisi dusuyor.
+
+**Determinizm uyarisi:** Snapshot alirken sayfada aktif animasyon varsa (fade-in, slide) farkli frame'lerde farkli style'lar gorunur. Cozumler:
+- `await page.waitForTimeout(2000)` ile snapshot'tan once bekle
+- Veya sayfaya `prefers-reduced-motion: reduce` emulate et: `await page.emulateMedia({ reducedMotion: 'reduce' })`
+
+Ikisi birden yapilirsa en guvenlisi.
+
+**Self-diff testi:** Technique'in dogrulugunu kontrol etmek icin ayni sayfa uzerinde iki snapshot al ve diff'le — sonuc 0 olmali (veya animasyon varsa <5). Pozitif rakam varsa determinizm sorunu var demektir.
+
 **ORCHESTRATOR ROLU ILE BUILDER ROLU AYRI TUTULMALI:**
 
 - Builder agent: sadece kendi component'ini yazar/duzeltir, orijinali gormez
@@ -1367,7 +1611,7 @@ builder'lar ise kucuk, odakli duzeltmeler yapar.
 
 ---
 
-## PHASE 4: Assembly & Final QA
+## PHASE 4: Assembly & Final QA [TOOL: Playwright (screenshot), Chrome MCP (live review)]
 
 ### Step 4.1 — Combine All Sections
 
@@ -1661,6 +1905,8 @@ Bu iteratif istekleri hizli karsilamak icin:
 - [ ] Step 1.1: 3 viewport screenshot (desktop/tablet/mobile)
 - [ ] Step 1.2: Section map → `reference/section-map.json`
 - [ ] Step 1.3: Design tokens + @font-face RESOLVED URLs → `reference/design-tokens.json`
+- [ ] **Step 1.3b (v2): CSS custom properties → `reference/design-tokens.json` (customProperties key)**
+- [ ] **Step 1.3.5 (v2): Network response tracking → `reference/network-assets.json`**
 - [ ] Step 1.4: Smooth scroll library detection (Lenis/Locomotive)
 - [ ] Step 1.5: Mandatory Interaction Sweep → `reference/BEHAVIORS.md` (scroll/click/hover sweeps)
 - [ ] Step 1.6: Responsive sweep comparison notes in BEHAVIORS.md
@@ -1676,7 +1922,7 @@ Bu iteratif istekleri hizli karsilamak icin:
 - [ ] Step 3.1: 3 viewport section screenshot
 - [ ] Step 3.2: Deep CSS extract
 - [ ] Step 3.2b: Component tree extraction (her eleman icin w/h/offset/fontSize/fontWeight/ff/color/bg)
-- [ ] Step 3.3b: Hover state extraction (Chrome MCP hover + re-extract + diff)
+- [ ] **Step 3.3b (v2 REVIZE): CSSOM hover rules extraction → `reference/hover-rules.json`**
 
 **Spec file:**
 - [ ] Step 3.4a: `docs/research/components/<Name>.spec.md` yazildi
@@ -1700,6 +1946,7 @@ Bu iteratif istekleri hizli karsilamak icin:
 
 **Orchestrator review:**
 - [ ] Step 3.6: Dev server baslatildi, klonun screenshot'lari alindi
+- [ ] **Step 3.6b (v2): Computed-style snapshot diff → `qa/diff-<section>.json`**
 - [ ] Her section orijinal ile karsilastirildi (desktop/tablet/mobile)
 - [ ] Farkliliklar tespit edildi, ilgili builder'lara SPESIFIK duzeltme talimati ile yeniden dispatch yapildi
 - [ ] Max 3 iterasyon sonra raporlandi

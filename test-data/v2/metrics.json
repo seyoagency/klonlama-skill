@@ -1,0 +1,21 @@
+{
+  "url": "https://isautier-ipp.com",
+  "timestamp": "2026-04-17T07:58:16.305Z",
+  "version": "v2",
+  "fontCount_v2": 5,
+  "fontUrls_v2": [
+    "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Bold.woff2",
+    "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Regular.woff2",
+    "https://isautier-ipp.com/wp-content/themes/salient/css/fonts/icomoon.woff?v=1.7",
+    "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/AvantGardeLT-Bold.woff2",
+    "https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2"
+  ],
+  "hoverRules_v2": 327,
+  "customProperties_v2": 133,
+  "snapshotSelfDiff_v2": 0,
+  "fontAccuracy_v2": {
+    "correct": 5,
+    "total": 5,
+    "pct": 100
+  }
+}
