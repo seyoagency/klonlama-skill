@@ -332,6 +332,70 @@ file public/fonts/*.woff2 public/fonts/*.woff
 # "HTML document" goruyorsan URL YANLIS — resolve edilen URL'yi kontrol et
 ```
 
+#### Step 1.3b — CSS Custom Properties Extraction (YENI v2)
+
+Site `:root { --primary: #004C93; --spacing-md: 16px; }` gibi design token'lar tanimliyorsa bunlari KAYNAKTA yakala. Computed degerler yerine token isimleri ile calismak klonda tekrar kullanilir ve iteratif renk ayari (kullanici "biraz daha koyu" dediginde) tek yerden yapilir.
+
+```javascript
+const customProps = await page.evaluate(() => {
+  const props = {};
+  for (const root of [document.documentElement, document.body]) {
+    const s = getComputedStyle(root);
+    for (const name of s) {
+      if (name.startsWith('--')) {
+        props[name] = s.getPropertyValue(name).trim();
+      }
+    }
+  }
+
+  const sheetProps = {};
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        if (rule.type !== 1) continue;
+        for (const prop of rule.style) {
+          if (prop.startsWith('--')) {
+            sheetProps[prop] = rule.style.getPropertyValue(prop).trim();
+          }
+        }
+      }
+    } catch(e) {}  // CORS stylesheet'ler okunamaz
+  }
+
+  return { root: props, sheets: sheetProps };
+});
+```
+
+Ciktiyi `design-tokens.json`'un icine `customProperties` anahtari altinda kaydet:
+
+```json
+{
+  "bodyBg": "rgb(255, 255, 255)",
+  "customProperties": {
+    "--primary": "#004C93",
+    "--secondary": "#726566",
+    "--spacing-md": "16px"
+  }
+}
+```
+
+**Tailwind config'e yansima:** Builder `tailwind.config.js`'e custom property'leri color/spacing/radius kategorilerine gore ekler:
+
+```javascript
+theme: {
+  extend: {
+    colors: {
+      primary: 'var(--primary)',
+      secondary: 'var(--secondary)'
+    }
+  }
+}
+```
+
+Component'te `bg-primary` kullanilir, 50 yerde `bg-[#004C93]` hardcoded olmaz.
+
+**CORS uyarisi:** Cross-origin stylesheet'ler `cssRules` ile okunamaz (`try/catch` atlar). Bu durumda sadece `:root` ve `body` computed'deki custom property'ler yakalanir, sheet kaynakli olanlar kacirilabilir. Site kendi domain'inden yuklu CSS kullaniyorsa sorun olmaz.
+
 ### Step 1.4 — Smooth Scroll Library Detection (YENI)
 
 Modern sitelerde native scroll yerine Lenis, Locomotive Scroll gibi smooth-scroll
