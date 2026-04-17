@@ -396,6 +396,68 @@ Component'te `bg-primary` kullanilir, 50 yerde `bg-[#004C93]` hardcoded olmaz.
 
 **CORS uyarisi:** Cross-origin stylesheet'ler `cssRules` ile okunamaz (`try/catch` atlar). Bu durumda sadece `:root` ve `body` computed'deki custom property'ler yakalanir, sheet kaynakli olanlar kacirilabilir. Site kendi domain'inden yuklu CSS kullaniyorsa sorun olmaz.
 
+### Step 1.3.5 — Network Response Tracking (YENI v2)
+
+Page'in GERCEKTEN yuklediği asset'lerin kesin URL'lerini yakala. CSS parsing ve `@font-face` extraction'a EK ve DOGRULAYICI bir katman. En sik yapilan hata olan "font URL yanlis resolve edildi, HTML/CSS indirildi" sorununu kokten kapatir.
+
+**Kritik:** `page.on('response')` listener'i `page.goto()` CAGIRISINDAN ONCE kurulmali. Goto sonrasi kurulan listener sayfanin yuklenme esnasindaki response'lari kacirir.
+
+```javascript
+const networkAssets = { fonts: [], images: [], stylesheets: [], videos: [] };
+
+page.on('response', async (response) => {
+  const url = response.url();
+  const ct = response.headers()['content-type'] || '';
+  const status = response.status();
+  if (status >= 400) return;  // hata sayfalarini alma
+
+  const entry = { url, status, size: 0 };
+  try { entry.size = (await response.body()).length; } catch(e) {}
+
+  if (ct.includes('font') || /\.(woff2?|ttf|otf|eot)(\?|$)/i.test(url)) {
+    networkAssets.fonts.push({ ...entry, format: ct });
+  } else if (ct.startsWith('image/') || /\.(png|jpg|jpeg|webp|avif|svg|gif)(\?|$)/i.test(url)) {
+    networkAssets.images.push(entry);
+  } else if (ct.includes('css') || /\.css(\?|$)/i.test(url)) {
+    networkAssets.stylesheets.push(entry);
+  } else if (ct.startsWith('video/') || /\.(mp4|webm|mov)(\?|$)/i.test(url)) {
+    networkAssets.videos.push(entry);
+  }
+});
+
+// Simdi goto et
+await page.goto(TARGET_URL, { waitUntil: 'networkidle' });
+fs.writeFileSync('reference/network-assets.json', JSON.stringify(networkAssets, null, 2));
+```
+
+**Dogrulama kurali:** Step 1.3'teki `@font-face` extraction URL'leri ile `networkAssets.fonts` URL'leri CAKISMALI. Cakismayanlar:
+- CSS'te tanimli ama kullanilmayan fontlar (ignore et)
+- CSS parsing'in yanlis resolve ettigi URL'ler (network'unkini kullan — cunku bu gercekten yuklenen dosya)
+
+Indirirken mutlaka network kaynakli URL'i kullan:
+
+```bash
+while IFS= read -r url; do
+  filename=$(basename "$url" | cut -d'?' -f1)
+  curl -fsSL -o "public/fonts/$filename" "$url"
+done < <(jq -r '.fonts[].url' reference/network-assets.json)
+
+file public/fonts/*.woff2 public/fonts/*.woff 2>/dev/null
+# Beklenen: "Web Open Font Format" — "HTML document" ya da "ASCII text" GORMEMELISIN
+```
+
+**Filtreleme (opsiyonel, tavsiye):** Analytics, telemetry gibi alakasiz response'lari eleyecek ek filtre:
+
+```javascript
+page.on('response', async (response) => {
+  const url = response.url();
+  if (/\/(analytics|track|pixel|beacon|collect)\//i.test(url)) return;
+  // ...kalani ayni
+});
+```
+
+Tracking URL'leri genellikle kucuk (< 500B) ve yonetilmek zor olduklarindan, onemli asset'lere odaklanmayi kolaylastirir.
+
 ### Step 1.4 — Smooth Scroll Library Detection (YENI)
 
 Modern sitelerde native scroll yerine Lenis, Locomotive Scroll gibi smooth-scroll
