@@ -1,0 +1,5 @@
+fonts/AvantGardeLT-Bold.woff2:                           Web Open Font Format (Version 2), TrueType, length 17148, version 1.0
+fonts/Avenir-Bold.woff2:                                 Web Open Font Format (Version 2), TrueType, length 19456, version 1.0
+fonts/Avenir-Regular.woff2:                              Web Open Font Format (Version 2), TrueType, length 18656, version 1.0
+fonts/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2: Web Open Font Format (Version 2), TrueType, length 34668, version 1.0
+fonts/icomoon.woff:                                      Web Open Font Format, TrueType, length 21964, version 0.0

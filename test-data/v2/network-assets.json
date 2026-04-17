@@ -1,0 +1,365 @@
+{
+  "fonts": [
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Bold.woff2",
+      "status": 200,
+      "size": 19456,
+      "format": "font/woff2"
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Regular.woff2",
+      "status": 200,
+      "size": 18656,
+      "format": "font/woff2"
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/fonts/icomoon.woff?v=1.7",
+      "status": 200,
+      "size": 21964,
+      "format": "font/woff"
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/AvantGardeLT-Bold.woff2",
+      "status": 200,
+      "size": 17148,
+      "format": "font/woff2"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2",
+      "status": 200,
+      "size": 34668,
+      "format": "font/woff2"
+    }
+  ],
+  "images": [
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/isautier-patrimoine-logo.svg",
+      "status": 200,
+      "size": 7965
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/08/img-over-blanc-1.svg",
+      "status": 200,
+      "size": 1181
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/isautier-patrimoine-logo-white.svg",
+      "status": 200,
+      "size": 7917
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/08/farinsemble-001.svg",
+      "status": 200,
+      "size": 15223
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2022/11/facebook-circle.svg",
+      "status": 200,
+      "size": 549
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2021/06/email.svg",
+      "status": 200,
+      "size": 700
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2021/06/linkedin.svg",
+      "status": 200,
+      "size": 887
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2021/06/youtube.svg",
+      "status": 200,
+      "size": 932
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/12/preview.jpg",
+      "status": 200,
+      "size": 178870
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/esper-titre.svg",
+      "status": 200,
+      "size": 1263
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/sepanouir.svg",
+      "status": 200,
+      "size": 23461
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/Frame-13.svg",
+      "status": 200,
+      "size": 6124
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/right-arrow.svg",
+      "status": 200,
+      "size": 196
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/Frame-17.svg",
+      "status": 200,
+      "size": 7495
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/sesoigner.svg",
+      "status": 200,
+      "size": 33218
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/sedevelopper.svg",
+      "status": 200,
+      "size": 30131
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/12/IPP-Immo-1-1-1024x683.jpg",
+      "status": 200,
+      "size": 160340
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/11/003-1-1024x560.jpg",
+      "status": 200,
+      "size": 92636
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/09/sedivertir.svg",
+      "status": 200,
+      "size": 23554
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/12/IPP-Immo-02074.jpg",
+      "status": 200,
+      "size": 198649
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/11/IPP-Immo-07249-1024x683.jpg",
+      "status": 200,
+      "size": 118685
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/11/003-1024x560.jpg",
+      "status": 200,
+      "size": 142495
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/003-4-1024x560.jpg",
+      "status": 200,
+      "size": 89977
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/003-2-1024x560.jpg",
+      "status": 200,
+      "size": 115607
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/003-5-1024x560.jpg",
+      "status": 200,
+      "size": 92099
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/IPP-Immo-07244-1024x683.jpg",
+      "status": 200,
+      "size": 174478
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/img/right-arrow.svg",
+      "status": 200,
+      "size": 224
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/07/AdobeStock_139089520-Grande.jpeg",
+      "status": 200,
+      "size": 232204
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2021/06/img-over-footer.svg",
+      "status": 200,
+      "size": 1194
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2024/12/Isautier-48-Moyenne.jpeg",
+      "status": 200,
+      "size": 117631
+    },
+    {
+      "url": "https://www.gstatic.com/recaptcha/api2/logo_48.png",
+      "status": 200,
+      "size": 2228
+    }
+  ],
+  "stylesheets": [
+    {
+      "url": "https://isautier-ipp.com/wp-content/plugins/pressidium-cookie-consent/public/bundle.client.css?ver=a42c7610e2f07a53bd90",
+      "status": 200,
+      "size": 19129
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/font-awesome.min.css?ver=4.7.1",
+      "status": 200,
+      "size": 34885
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/grid-system.css?ver=18.0.2",
+      "status": 200,
+      "size": 21942
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/style.css?ver=18.0.2",
+      "status": 200,
+      "size": 164136
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/header/header-layout-centered-logo-between-menu-alt.css?ver=18.0.2",
+      "status": 200,
+      "size": 2001
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/elements/element-post-grid.css?ver=18.0.2",
+      "status": 200,
+      "size": 49273
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/elements/element-highlighted-text.css?ver=18.0.2",
+      "status": 200,
+      "size": 3970
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/elements/element-icon-with-text.css?ver=18.0.2",
+      "status": 200,
+      "size": 1264
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/plugins/flickity.css?ver=18.0.2",
+      "status": 200,
+      "size": 42450
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/style.css?ver=18.0.2",
+      "status": 200,
+      "size": 20520
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/blog/masonry-classic-enhanced.css?ver=18.0.2",
+      "status": 200,
+      "size": 25650
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/salient/menu-dynamic.css?ver=49173",
+      "status": 200,
+      "size": 4124
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/salient/salient-dynamic-styles.css?ver=12491",
+      "status": 200,
+      "size": 141553
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/responsive.css?ver=18.0.2",
+      "status": 200,
+      "size": 36252
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/cookie-notice.css?ver=1.50",
+      "status": 200,
+      "size": 1947
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/plugins/js_composer.css?ver=18.0.2",
+      "status": 200,
+      "size": 23546
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/blog/masonry-core.css?ver=18.0.2",
+      "status": 200,
+      "size": 9828
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/elements/element-wpb-column-border.css?ver=18.0.2",
+      "status": 200,
+      "size": 21634
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/skin-material.css?ver=18.0.2",
+      "status": 200,
+      "size": 55994
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/page.css?ver=1.50",
+      "status": 200,
+      "size": 3551
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/produit-immobilier.css?ver=1.50",
+      "status": 200,
+      "size": 7133
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/off-canvas/fullscreen-split.css?ver=18.0.2",
+      "status": 200,
+      "size": 9560
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/plugins/jquery.fancybox.css?ver=3.3.1",
+      "status": 200,
+      "size": 13897
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/menu.css?ver=1.50",
+      "status": 200,
+      "size": 5638
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/style-non-critical.css?ver=18.0.2",
+      "status": 200,
+      "size": 32717
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/layout-aa.css?ver=1.50",
+      "status": 200,
+      "size": 1692
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/contact-form.css?ver=1.50",
+      "status": 200,
+      "size": 621
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/anim-hover-css.css?ver=1.50",
+      "status": 200,
+      "size": 10421
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/blog.css?ver=1.50",
+      "status": 200,
+      "size": 7196
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient/css/build/off-canvas/core.css?ver=18.0.2",
+      "status": 200,
+      "size": 26420
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/themes/salient-child/css/programme-immobilier.css?ver=1.50",
+      "status": 200,
+      "size": 28771
+    },
+    {
+      "url": "https://www.gstatic.com/recaptcha/releases/gTpTIWhbKpxADzTzkcabhXN4/styles__ltr.css",
+      "status": 200,
+      "size": 83366
+    }
+  ],
+  "videos": [
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2025/01/002-small.mp4",
+      "status": 206,
+      "size": 0
+    },
+    {
+      "url": "https://isautier-ipp.com/wp-content/uploads/2025/01/002-small.mp4",
+      "status": 206,
+      "size": 20990
+    }
+  ]
+}
