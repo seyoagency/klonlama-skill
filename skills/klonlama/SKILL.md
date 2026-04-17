@@ -1513,6 +1513,93 @@ detaylari atlar. Orchestrator loop'u bunu otomatik yakalayip duzeltir.
    | MetiersSection | ✅ | ✅ | ⚠ | Card stack order wrong |
    | ... | ... | ... | ... | ... |
 
+#### Step 3.6b — Computed-Style Snapshot Diff (YENI v2)
+
+Pixel comparison gurultulu — font anti-aliasing, sub-pixel rendering farklari "gorsel fark" olarak sahte-pozitif uretir. Asil soru: **renkler, boyutlar, fontlar, padding'ler eslesiyor mu?** Bu bir JSON diff sorusudur.
+
+Her section icin orijinal ve klondan AYNI CSS property setini cikarip karsilastir. Pixel diff opsiyonel bir ek katman olarak kalir, ama birinci kontrol bu JSON diff'tir.
+
+```javascript
+async function snapshotSection(page, sectionSelector) {
+  return await page.evaluate((sel) => {
+    const root = document.querySelector(sel);
+    if (!root) return null;
+
+    const PROPS = [
+      'display','position','width','height','padding','margin',
+      'backgroundColor','color','fontSize','fontWeight','fontFamily',
+      'lineHeight','letterSpacing','textAlign','borderRadius','border',
+      'boxShadow','gap','flexDirection','justifyContent','alignItems',
+      'gridTemplateColumns','opacity','transform'
+    ];
+
+    function snap(el, path) {
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      const style = {};
+      for (const p of PROPS) style[p] = s[p];
+      return {
+        path, tag: el.tagName.toLowerCase(),
+        text: (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3)
+              ? el.textContent.trim().slice(0, 60) : null,
+        rect: { w: Math.round(r.width), h: Math.round(r.height) },
+        style,
+        children: [...el.children].map((c, i) => snap(c, `${path}/${c.tagName}[${i}]`))
+      };
+    }
+
+    return snap(root, sel);
+  }, sectionSelector);
+}
+
+function diffSnap(a, b, path = '') {
+  if (!a && !b) return [];
+  if (!a) return [{ path, diff: 'missing_in_original' }];
+  if (!b) return [{ path, diff: 'missing_in_clone' }];
+  const diffs = [];
+  for (const prop in a.style) {
+    if (a.style[prop] !== b.style[prop]) {
+      diffs.push({ path: a.path, prop, original: a.style[prop], clone: b.style[prop] });
+    }
+  }
+  const maxChildren = Math.max(a.children?.length || 0, b.children?.length || 0);
+  for (let i = 0; i < maxChildren; i++) {
+    diffs.push(...diffSnap(a.children?.[i], b.children?.[i], a.path));
+  }
+  return diffs;
+}
+
+// Kullanim — iki paralel context
+const origPage = await chromium.launch().then(b => b.newPage());
+await origPage.goto(TARGET_URL, { waitUntil: 'networkidle' });
+await origPage.waitForTimeout(2000);  // animasyonlar yerlessin
+const orig = await snapshotSection(origPage, 'header');
+
+const clonePage = await chromium.launch().then(b => b.newPage());
+await clonePage.goto('http://localhost:3000', { waitUntil: 'networkidle' });
+await clonePage.waitForTimeout(2000);
+const clone = await snapshotSection(clonePage, 'header');
+
+const diffs = diffSnap(orig, clone);
+fs.writeFileSync(`qa/diff-header.json`, JSON.stringify(diffs, null, 2));
+```
+
+**Builder dispatch'ine etkisi:** Pixel comparison "kart bg biraz farkli" derken, snapshot diff su sekilde net bir cikti verir:
+
+```json
+{ "path": "header/NAV/A[2]", "prop": "color", "original": "rgb(114, 101, 102)", "clone": "rgb(255, 255, 255)" }
+```
+
+Builder'a direkt talimat: "line 42'de `text-white` yerine `text-[#726566]` kullan." Iterasyon sayisi dusuyor.
+
+**Determinizm uyarisi:** Snapshot alirken sayfada aktif animasyon varsa (fade-in, slide) farkli frame'lerde farkli style'lar gorunur. Cozumler:
+- `await page.waitForTimeout(2000)` ile snapshot'tan once bekle
+- Veya sayfaya `prefers-reduced-motion: reduce` emulate et: `await page.emulateMedia({ reducedMotion: 'reduce' })`
+
+Ikisi birden yapilirsa en guvenlisi.
+
+**Self-diff testi:** Technique'in dogrulugunu kontrol etmek icin ayni sayfa uzerinde iki snapshot al ve diff'le — sonuc 0 olmali (veya animasyon varsa <5). Pozitif rakam varsa determinizm sorunu var demektir.
+
 **ORCHESTRATOR ROLU ILE BUILDER ROLU AYRI TUTULMALI:**
 
 - Builder agent: sadece kendi component'ini yazar/duzeltir, orijinali gormez
