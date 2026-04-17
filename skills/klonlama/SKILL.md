@@ -1905,6 +1905,8 @@ Bu iteratif istekleri hizli karsilamak icin:
 - [ ] Step 1.1: 3 viewport screenshot (desktop/tablet/mobile)
 - [ ] Step 1.2: Section map → `reference/section-map.json`
 - [ ] Step 1.3: Design tokens + @font-face RESOLVED URLs → `reference/design-tokens.json`
+- [ ] **Step 1.3b (v2): CSS custom properties → `reference/design-tokens.json` (customProperties key)**
+- [ ] **Step 1.3.5 (v2): Network response tracking → `reference/network-assets.json`**
 - [ ] Step 1.4: Smooth scroll library detection (Lenis/Locomotive)
 - [ ] Step 1.5: Mandatory Interaction Sweep → `reference/BEHAVIORS.md` (scroll/click/hover sweeps)
 - [ ] Step 1.6: Responsive sweep comparison notes in BEHAVIORS.md
@@ -1920,7 +1922,7 @@ Bu iteratif istekleri hizli karsilamak icin:
 - [ ] Step 3.1: 3 viewport section screenshot
 - [ ] Step 3.2: Deep CSS extract
 - [ ] Step 3.2b: Component tree extraction (her eleman icin w/h/offset/fontSize/fontWeight/ff/color/bg)
-- [ ] Step 3.3b: Hover state extraction (Chrome MCP hover + re-extract + diff)
+- [ ] **Step 3.3b (v2 REVIZE): CSSOM hover rules extraction → `reference/hover-rules.json`**
 
 **Spec file:**
 - [ ] Step 3.4a: `docs/research/components/<Name>.spec.md` yazildi
@@ -1944,6 +1946,7 @@ Bu iteratif istekleri hizli karsilamak icin:
 
 **Orchestrator review:**
 - [ ] Step 3.6: Dev server baslatildi, klonun screenshot'lari alindi
+- [ ] **Step 3.6b (v2): Computed-style snapshot diff → `qa/diff-<section>.json`**
 - [ ] Her section orijinal ile karsilastirildi (desktop/tablet/mobile)
 - [ ] Farkliliklar tespit edildi, ilgili builder'lara SPESIFIK duzeltme talimati ile yeniden dispatch yapildi
 - [ ] Max 3 iterasyon sonra raporlandi
