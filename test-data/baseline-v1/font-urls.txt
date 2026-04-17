@@ -1,0 +1,6 @@
+0 https://isautier-ipp.com/wp-content/themes/salient/css/fonts/fontawesome-webfont.woff?v=4.2
+1 https://isautier-ipp.com/wp-content/themes/salient/css/fonts/icomoon.woff?v=1.7
+2 https://isautier-ipp.com/wp-content/themes/salient-child/fonts/AvantGardeLT-Bold.woff2
+3 https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Regular.woff2
+4 https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Bold.woff2
+5 https://isautier-ipp.com/wp-content/themes/salient-child/style.css?ver=18.0.2

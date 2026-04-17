@@ -1,0 +1,32 @@
+[
+  {
+    "family": "FontAwesome",
+    "weight": "normal",
+    "url": "https://isautier-ipp.com/wp-content/themes/salient/css/fonts/fontawesome-webfont.woff?v=4.2"
+  },
+  {
+    "family": "icomoon",
+    "weight": "400",
+    "url": "https://isautier-ipp.com/wp-content/themes/salient/css/fonts/icomoon.woff?v=1.7"
+  },
+  {
+    "family": "AvantGarde",
+    "weight": "",
+    "url": "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/AvantGardeLT-Bold.woff2"
+  },
+  {
+    "family": "Avenir",
+    "weight": "400",
+    "url": "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Regular.woff2"
+  },
+  {
+    "family": "Avenir",
+    "weight": "600",
+    "url": "https://isautier-ipp.com/wp-content/themes/salient-child/fonts/Avenir-Bold.woff2"
+  },
+  {
+    "family": "Luthon",
+    "weight": "",
+    "url": "https://isautier-ipp.com/wp-content/themes/salient-child/style.css?ver=18.0.2"
+  }
+]
