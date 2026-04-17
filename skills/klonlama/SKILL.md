@@ -984,38 +984,69 @@ const sectionHTML = await page.evaluate((selector) => {
 Save as `reference/section-header.html` for reference. Don't copy it verbatim —
 use it to understand the structure, then write clean code.
 
-### Step 3.3b — Hover State Extraction (HER INTERAKTIF ELEMAN ICIN)
+### Step 3.3b — CSSOM'dan Hover State Extraction (v2 REVIZE)
 
-Kartlar, butonlar, linkler icin hover durumunu AYRI cikar. Hover'da neyin
-degistigini bilmeden component yazilamaz.
+**v1 yaklasimi (mouse hover + re-extract) kaldirilmisttir.** Yerine CSS kurallarini DOGRUDAN CSSOM'dan okuyoruz. Daha hizli, daha guvenilir, Chrome MCP'nin browser "read" tier kisitlamasindan etkilenmez.
 
 ```javascript
-// Hover state extraction — her interaktif eleman icin
-// Tarayici MCP ile elemana hover et, SONRA ayni elemani tekrar extract et
-// Ornek: kart hover
-const hoverData = await page.evaluate((selector) => {
-  const el = document.querySelector(selector);
-  if (!el) return null;
-  // Normal state zaten Step 3.2b'de cikarildi
-  // Simdi :hover pseudo-class varsa onu da al
-  // Not: getComputedStyle hover state'i dogrudan veremez,
-  // tarayici MCP ile hover edip tekrar extractNode calistirmalisin
-  const s = getComputedStyle(el);
-  return {
-    transition: s.transition,
-    cursor: s.cursor,
-    // Kart hover'da genelde degisen ozellikler:
-    boxShadow: s.boxShadow,
-    transform: s.transform,
-    backgroundColor: s.backgroundColor,
-    borderColor: s.borderColor,
-    opacity: s.opacity
-  };
-}, cardSelector);
+const hoverRules = await page.evaluate(() => {
+  const rules = [];
+  for (const sheet of document.styleSheets) {
+    let cssRules;
+    try { cssRules = sheet.cssRules; } catch(e) { continue; }  // CORS
+
+    for (const rule of cssRules) {
+      if (rule.type !== 1) continue;  // CSSStyleRule degilse atla
+      if (!rule.selectorText?.includes(':hover')) continue;
+
+      const baseSelector = rule.selectorText.replace(/:hover/g, '').trim();
+      let matchedElements = [];
+      try {
+        matchedElements = [...document.querySelectorAll(baseSelector)].slice(0, 3);
+      } catch(e) {}
+
+      const styleMap = {};
+      for (const prop of rule.style) {
+        styleMap[prop] = rule.style.getPropertyValue(prop);
+      }
+
+      rules.push({
+        selector: rule.selectorText,
+        baseSelector,
+        styles: styleMap,
+        sampleElements: matchedElements.map(el => ({
+          tag: el.tagName,
+          class: typeof el.className === 'string' ? el.className.split(' ').slice(0,3).join(' ') : '',
+          text: el.textContent?.trim().slice(0, 40)
+        }))
+      });
+    }
+  }
+  return rules;
+});
 ```
 
-Tarayici MCP ile hover edip ONCE/SONRA state'lerini karsilastir.
-Fark olan her ozelligi component'e transition + hover class olarak ekle.
+Ciktiyi `reference/hover-rules.json` olarak kaydet. Her component'in spec'inde "Hover States" bolumu bu JSON'dan su sekilde filtrelenir: ilgili component'in `baseSelector`'u ile eslesen kurallar.
+
+**Spec entegrasyonu ornegi:**
+
+```markdown
+## Hover States (from CSSOM)
+- `.btn-primary:hover`: background-color→#003a73, transform→translateY(-2px)
+- `.card:hover`: box-shadow→0 10px 30px rgba(0,0,0,0.15), transition→all 0.3s ease
+```
+
+Builder Tailwind'e cevirir: `hover:bg-[#003a73] hover:-translate-y-[2px]`.
+
+**CORS fallback:** Cross-origin stylesheet'ler okunamiyorsa (nadir, genelde CDN'lerde CORS header gonderilir), o stylesheet'in hover kurallari kacirilir. Bu durumda Chrome MCP ile kritik butonlarin hover'ini manuel dogrula.
+
+**Validation (opsiyonel):** Kritik bir component icin CSSOM'dan cikarilan hover degerini canli tarayicida DOGRULAMAK istersen Chrome MCP'yle:
+1. Sayfayi ac
+2. `mouse_move` ile elemana hover et
+3. `javascript_tool` ile `getComputedStyle(el)` al (bu sefer :hover pseudo-class aktif)
+4. CSSOM cikarilan degerle karsilastir
+
+Bu adim zorunlu degil — hover rule'larin %95'i CSSOM'da mevcuttur.
 
 ### Step 3.4a — Write Spec File → `docs/research/components/<Name>.spec.md` (ZORUNLU)
 
